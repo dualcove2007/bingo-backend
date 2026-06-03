@@ -8,7 +8,17 @@ from dotenv import load_dotenv # Corregido aquí, pa
 # Cargar las variables de entorno
 load_dotenv()
 
-app = FastAPI(title="Bingo Async API")
+app = FastAPI(title="Bingo API") # Esto ya lo tienes
+
+# ===== CONFIGURACIÓN DE CORS (AÑADE ESTO) =====
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Permite que cargue desde tu PC local o cualquier lado
+    allow_credentials=True,
+    allow_methods=["*"],  # Permite POST, GET, etc.
+    allow_headers=["*"],
+)
+# ===============================================
 
 # ... Middleware de CORS igual ...
 
