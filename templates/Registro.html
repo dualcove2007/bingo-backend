@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo - Crear Cuenta</title>
+    <style>
+        /* Reset de estilos básicos */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Fondo general de la página */
+        body {
+            background-color: #0b0f19; /* Azul oscuro profundo */
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Tarjeta contenedora del Registro (un toque más alta para el tercer input) */
+        .register-card {
+            background-color: #1e2640; /* Azul grisáceo de la tarjeta */
+            width: 100%;
+            max-width: 380px;
+            padding: 45px 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        /* Título CREAR CUENTA */
+        .register-title {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 35px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* Grupo de campos de entrada */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        /* Estilos para los inputs */
+        .register-input {
+            width: 100%;
+            padding: 14px 16px;
+            background-color: #181e36; /* Fondo más oscuro para el input */
+            border: 1px solid #2b3554; /* Borde sutil */
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        /* Efecto al hacer foco en los inputs */
+        .register-input:focus {
+            border-color: #b5ff60; 
+        }
+
+        /* Color del texto de ayuda (placeholder) */
+        .register-input::placeholder {
+            color: #566488;
+        }
+
+        /* Botón REGISTRARME Y JUGAR */
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background-color: #b5ff60; /* Verde neón */
+            border: none;
+            border-radius: 6px;
+            color: #0b0f19; /* Texto oscuro para contraste */
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            margin-top: 15px;
+            margin-bottom: 30px;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        /* Efecto hover para el botón */
+        .btn-submit:hover {
+            background-color: #a2e650;
+        }
+
+        /* Efecto click */
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+
+        /* Enlace inferior */
+        .login-link {
+            display: inline-block;
+            color: #527874; /* Color verde opaco */
+            font-size: 13px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .login-link:hover {
+            color: #b5ff60;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="register-card">
+        <h1 class="register-title">Crear Cuenta</h1>
+        
+        <form id="registerForm">
+            <div class="input-group">
+                <input type="text" id="username" class="register-input" placeholder="Introduce tu usuario" required>
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="player_name" class="register-input" placeholder="Introduce tu nombre de jugador..." required>
+            </div>
+            
+            <div class="input-group">
+                <input type="password" id="password" class="register-input" placeholder="********" required>
+            </div>
+            
+            <button type="submit" class="btn-submit">Registrarme y Jugar</button>
+        </form>
+        
+        <a href="/" class="login-link">¿Ya tienes cuenta? Ingresa aquí</a>
+    </div>
+
+    <script>
+        // TRUCO PRO: Toma automáticamente la URL del host donde está corriendo (Render o Local)
+        const BACKEND_URL = window.location.origin;
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); 
+
+            const username = document.getElementById('username').value;
+            const player_name = document.getElementById('player_name').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, player_name, password })
+                });
+
+                const data = await response.json();
+
+                if (response.status === 200 || response.status === 201) {
+                    alert("¡Usuario registrado con éxito, pa! Redireccionando al login...");
+                    window.location.href = "/"; // Lo manda a la raíz (Página de Login)
+                } else {
+                    alert(`Error: ${data.detail || "No se pudo completar el registro."}`);
+                }
+            } catch (error) {
+                console.error("Error detectado en el fetch:", error);
+                alert("Mano, hubo un problema al conectar con el servidor. Revisa la consola.");
+            }
+        });
+    </script>
+
+</body>
+</html>

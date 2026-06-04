@@ -1,28 +1,26 @@
 import os
 from fastapi import FastAPI, HTTPException, status
+from fastapi.responses import HTMLResponse  # <-- Importación para servir HTML
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import httpx
-from dotenv import load_dotenv # Corregido aquí, pa
+from dotenv import load_dotenv
 
 # Cargar las variables de entorno
 load_dotenv()
 
-app = FastAPI(title="Bingo API") # Esto ya lo tienes
+app = FastAPI(title="Bingo Platform")
 
-# ===== CONFIGURACIÓN DE CORS (AÑADE ESTO) =====
+# ===== CONFIGURACIÓN DE CORS =====
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Permite que cargue desde tu PC local o cualquier lado
+    allow_origins=["*"],  # Permite conexiones desde cualquier origen
     allow_credentials=True,
-    allow_methods=["*"],  # Permite POST, GET, etc.
+    allow_methods=["*"],  # Permite POST, GET, PUT, DELETE, etc.
     allow_headers=["*"],
 )
-# ===============================================
 
-# ... Middleware de CORS igual ...
-
-# Ahora las variables se leen de forma segura
+# Ahora las variables se leen de forma segura desde el entorno (.env o Render)
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
@@ -35,7 +33,7 @@ HEADERS = {
     "Content-Type": "application/json"
 }
 
-# Modelos de datos
+# Modelos de datos (Pydantic)
 class UserRegister(BaseModel):
     username: str
     player_name: str
@@ -45,9 +43,39 @@ class UserLogin(BaseModel):
     username: str
     password: str
 
-@app.get("/")
-async def root():
-    return {"status": "ok", "message": "PRUEBA REINA: SI LEES ESTO EL ARCHIVO ES EL CORRECTO"}
+
+# =====================================================================
+# 🏠 RUTAS DE FRONTEND INTEGRADO (SERVIR PÁGINAS WEB HTML)
+# =====================================================================
+
+@app.get("/", response_class=HTMLResponse)
+async def read_login():
+    """Ruta raíz: Carga directamente la interfaz de Login."""
+    try:
+        with open("templates/Login.html", "r", encoding="utf-8") as file:
+            return file.read()
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=404, 
+            detail="Mano, no encontré el archivo 'Login.html' dentro de la carpeta 'templates'."
+        )
+
+@app.get("/registro", response_class=HTMLResponse)
+async def read_registro():
+    """Ruta secundaria: Carga directamente la interfaz de Registro."""
+    try:
+        with open("templates/Registro.html", "r", encoding="utf-8") as file:
+            return file.read()
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=404, 
+            detail="Mano, no encontré el archivo 'Registro.html' dentro de la carpeta 'templates'."
+        )
+
+
+# =====================================================================
+# 🔐 ENDPOINTS DE LA API (PROCESAMIENTO DE DATOS / AUTENTICACIÓN)
+# =====================================================================
 
 @app.post("/auth/register")
 async def register(user: UserRegister):
@@ -57,7 +85,6 @@ async def register(user: UserRegister):
             url_check = f"{SUPABASE_URL}/rest/v1/usuarios?username=eq.{user.username}"
             res_check = await client.get(url_check, headers=HEADERS)
             
-            # Si el chequeo falla (ej. llave mala o error de red), te lo mostrará en el navegador
             if res_check.status_code != 200:
                 raise HTTPException(
                     status_code=res_check.status_code, 
@@ -89,6 +116,7 @@ async def register(user: UserRegister):
             raise http_ex
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+
 
 @app.post("/auth/login")
 async def login(user: UserLogin):
