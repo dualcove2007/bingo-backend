@@ -253,7 +253,11 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const playerName = localStorage.getItem('player_name') || "Jugador Anónimo";
+            const playerName = localStorage.getItem('player_name') || "Jugador_Anonimo";
+
+            // 🔥 SOLUCIÓN AL 404: Limpiamos los espacios reemplazándolos por guiones bajos
+            // para que FastAPI rutee de manera correcta y estable sin confundir caracteres.
+            const sanitizedName = playerName.trim().replace(/\s+/g, '_');
 
             // Manejo del Logout
             document.getElementById('logoutBtn').addEventListener('click', () => {
@@ -261,11 +265,14 @@
                 window.location.href = "/";
             });
 
-            // 🌐 LÓGICA DE WEBSOCKET INTELIGENTE
-            // Convierte http:// o https:// a ws:// o wss:// automáticamente para Render
+            // 🌐 LÓGICA DE WEBSOCKET DINÁMICA E INTELIGENTE
             const loc = window.location;
             let wsUri = loc.protocol === "https:" ? "wss://" : "ws://";
-            wsUri += loc.host + "/ws/lobby/" + encodeURIComponent(playerName);
+            
+            // Pasamos el parámetro limpio a la ruta
+            wsUri += loc.host + "/ws/lobby/" + sanitizedName;
+
+            console.log("Intentando conectar canal WebSocket en: ", wsUri);
 
             const socket = new WebSocket(wsUri);
 
@@ -276,21 +283,22 @@
 
             // Cuando se abre la conexión
             socket.onopen = () => {
-                statusDot.style.backgroundColor = "#b5ff60"; // Verde neón
+                statusDot.style.backgroundColor = "#b5ff60"; // Verde neón definitivo
                 statusText.style.color = "#b5ff60";
                 statusText.innerText = "Conexión Segura Establecida";
             };
 
-            // Cuando el backend nos envía datos en tiempo real
+            // Cuando el backend nos envía datos de la sala en tiempo real
             socket.onmessage = (event) => {
                 const data = JSON.parse(event.data);
 
                 // Si recibimos una actualización de la lista de jugadores
                 if (data.tipo === "actualizacion_sala") {
+                    // Reemplazamos los guiones bajos por espacios de nuevo sólo para pintar estéticamente la UI
                     const listaHtml = data.jugadores.map(p => `
                         <div class="player-row">
                             <span class="dot"></span>
-                            <span>${p}</span>
+                            <span>${p.replace(/_/g, ' ')}</span>
                         </div>
                     `).join('');
                     
@@ -305,7 +313,7 @@
                 }
             };
 
-            // Si se cae el internet o se cierra la conexión
+            // Si se cae la conexión o se cierra la ventana
             socket.onclose = () => {
                 statusDot.style.backgroundColor = "#ff6b6b"; // Rojo error
                 statusText.style.color = "#ff6b6b";
