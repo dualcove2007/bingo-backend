@@ -14,7 +14,7 @@
         }
 
         body {
-            background-color: #0b0f19; /* Fondo oscuro profundo */
+            background-color: #0b0f19; 
             min-height: 100vh;
             display: flex;
             color: #ffffff;
@@ -24,7 +24,7 @@
         /* --- BARRA LATERAL (SIDEBAR) --- */
         .sidebar {
             width: 240px;
-            background-color: #1a2238; /* Azul grisáceo de la barra */
+            background-color: #1a2238; 
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -38,7 +38,6 @@
             gap: 50px;
         }
 
-        /* Logo superior "BINGO" */
         .logo {
             font-size: 18px;
             font-weight: 700;
@@ -46,7 +45,6 @@
             padding-left: 10px;
         }
 
-        /* Menú de navegación */
         .nav-menu {
             display: flex;
             flex-direction: column;
@@ -66,12 +64,10 @@
             transition: all 0.2s ease;
         }
 
-        /* Opción activa (Jugar en Línea) */
         .nav-item.active {
-            color: #b5ff60; /* Verde neón */
+            color: #b5ff60; 
         }
 
-        /* Opciones inactivas */
         .nav-item.inactive {
             color: #5d6b89;
         }
@@ -81,7 +77,6 @@
             background-color: #232d4a;
         }
 
-        /* Botón Cerrar Sesión abajo */
         .logout-btn {
             display: flex;
             align-items: center;
@@ -92,6 +87,7 @@
             font-size: 15px;
             font-weight: 600;
             border-radius: 6px;
+            cursor: pointer;
             transition: all 0.2s ease;
         }
 
@@ -100,10 +96,9 @@
             background-color: #232d4a;
         }
 
-
         /* --- CONTENIDO PRINCIPAL --- */
         .main-content {
-            flex: 1; /* Corrección aplicada prro */
+            flex: 1;
             padding: 40px;
             display: flex;
             flex-direction: column;
@@ -112,62 +107,87 @@
             gap: 30px;
         }
 
-        /* Contenedor del Estado "Conectando..." */
         .status-container {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
+            background-color: #161d31;
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 1px solid #232d4a;
         }
 
-        /* Punto verde indicador */
         .status-dot {
-            width: 20px;
-            height: 20px;
-            background-color: #00e6a6; /* Verde turquesa del diseño */
+            width: 10px;
+            height: 10px;
+            background-color: #ffb800; /* Amarillo inicial "Conectando" */
             border-radius: 50%;
-            animation: pulse 1.8s infinite ease-in-out;
+            animation: pulse 1.5s infinite;
         }
 
-        /* Texto de estado */
         .status-text {
-            font-size: 26px;
-            font-weight: 700;
-            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffb800;
             letter-spacing: 0.5px;
         }
 
-        /* Tarjeta JUGADORES EN LA SALA */
         .lobby-card {
-            background-color: #14192d; /* Fondo de la tarjeta central */
-            border: 1px solid #1f2742;
-            border-radius: 12px;
+            background-color: #161d31;
+            border: 1px solid #1f2842;
+            border-radius: 16px;
             width: 100%;
-            max-width: 360px;
-            padding: 24px;
+            max-width: 480px;
+            padding: 40px;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
         }
 
-        /* Título del contador */
         .lobby-title {
-            font-size: 16px;
+            font-size: 22px;
             font-weight: 700;
-            color: #ffffff;
             margin-bottom: 15px;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.5px;
+            color: #ffffff;
         }
 
-        /* Descripción de la sala */
         .lobby-description {
             color: #94a3b8;
-            font-size: 11px;
-            line-height: 1.5;
-            font-weight: 600;
-            text-align: left; /* Alineación de texto a la izquierda como la imagen */
-            padding: 0 5px;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 30px;
         }
 
-        /* Animación para el punto de carga */
+        /* Contenedor dinámico de la lista de jugadores conectados */
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-align: left;
+            background: #0b0f19;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #1f2842;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .player-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+
+        .player-row .dot {
+            width: 6px;
+            height: 6px;
+            background-color: #b5ff60;
+            border-radius: 50%;
+        }
+
         @keyframes pulse {
             0% {
                 transform: scale(0.9);
@@ -193,12 +213,12 @@
             <nav>
                 <ul class="nav-menu">
                     <li>
-                        <a href="#" class="nav-item active">
+                        <a href="/menu" class="nav-item active">
                             <span>🎮</span> Jugar en Línea
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="nav-item inactive">
+                        <a href="/opciones" class="nav-item inactive">
                             <span>⚙️</span> Opciones
                         </a>
                     </li>
@@ -206,26 +226,97 @@
             </nav>
         </div>
 
-        <a href="#" class="logout-btn">
+        <div id="logoutBtn" class="logout-btn">
             <span>🚪</span> Cerrar Sesión
-        </a>
+        </div>
     </aside>
 
     <main class="main-content">
         
         <div class="status-container">
-            <div class="status-dot"></div>
-            <h2 class="status-text">Conectando...</h2>
+            <div id="statusDot" class="status-dot"></div>
+            <h2 id="statusText" class="status-text">Conectando al servidor...</h2>
         </div>
         
         <div class="lobby-card">
-            <h3 class="lobby-title">Jugadores en la sala: 3 / 5</h3>
+            <h3 id="lobbyCount" class="lobby-title">Jugadores en la sala: 0</h3>
             <p class="lobby-description">
-                La partida iniciará automáticamente cuando se llene la sala o el administrador dé la orden.
+                La partida iniciará automáticamente cuando se complete el cupo de jugadores en la sala de espera.
             </p>
-        </div>
 
+            <div class="players-list" id="playersList">
+                <p style="color: #566488; text-align: center; font-size: 13px;">Buscando otros jugadores...</p>
+            </div>
+        </div>
+        
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const playerName = localStorage.getItem('player_name') || "Jugador Anónimo";
+
+            // Manejo del Logout
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                localStorage.clear();
+                window.location.href = "/";
+            });
+
+            // 🌐 LÓGICA DE WEBSOCKET INTELIGENTE
+            // Convierte http:// o https:// a ws:// o wss:// automáticamente para Render
+            const loc = window.location;
+            let wsUri = loc.protocol === "https:" ? "wss://" : "ws://";
+            wsUri += loc.host + "/ws/lobby/" + encodeURIComponent(playerName);
+
+            const socket = new WebSocket(wsUri);
+
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const lobbyCount = document.getElementById('lobbyCount');
+            const playersList = document.getElementById('playersList');
+
+            // Cuando se abre la conexión
+            socket.onopen = () => {
+                statusDot.style.backgroundColor = "#b5ff60"; // Verde neón
+                statusText.style.color = "#b5ff60";
+                statusText.innerText = "Conexión Segura Establecida";
+            };
+
+            // Cuando el backend nos envía datos en tiempo real
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+
+                // Si recibimos una actualización de la lista de jugadores
+                if (data.tipo === "actualizacion_sala") {
+                    const listaHtml = data.jugadores.map(p => `
+                        <div class="player-row">
+                            <span class="dot"></span>
+                            <span>${p}</span>
+                        </div>
+                    `).join('');
+                    
+                    playersList.innerHTML = listaHtml;
+                    lobbyCount.innerText = `Jugadores en la sala: ${data.total}`;
+                }
+
+                // Si el servidor da la orden de arrancar la partida
+                if (data.action === "START_GAME") {
+                    alert("¡Sala llena, mano! La partida comienza ya.");
+                    window.location.href = "/juego";
+                }
+            };
+
+            // Si se cae el internet o se cierra la conexión
+            socket.onclose = () => {
+                statusDot.style.backgroundColor = "#ff6b6b"; // Rojo error
+                statusText.style.color = "#ff6b6b";
+                statusText.innerText = "Desconectado de la sala";
+            };
+
+            socket.onerror = (error) => {
+                console.error("Error en WebSocket:", error);
+            };
+        });
+    </script>
 
 </body>
 </html>

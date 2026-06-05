@@ -1,15 +1,16 @@
 import os
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import httpx
+import json
 from dotenv import load_dotenv
 
 # Cargar las variables de entorno
 load_dotenv()
 
-app = FastAPI(title="Bingo Async Platform - Full Engine")
+app = FastAPI(title="Bingo Async Platform - Realtime Engine")
 
 # ===== CONFIGURACIÓN DE CORS =====
 app.add_middleware(
@@ -45,11 +46,63 @@ class UserLogin(BaseModel):
 
 
 # =====================================================================
+# 🌐 ADMINISTRADOR DE CONEXIONES WEBSOCKET (TIEMPO REAL)
+# =====================================================================
+class LobbyManager:
+    def __init__(self):
+        # Diccionario para mapear {nombre_jugador: websocket_activo}
+        self.active_connections: dict[str, WebSocket] = {}
+
+    async def connect(self, websocket: WebSocket, player_name: str):
+        await websocket.accept()
+        # Registrar al jugador en la sala asíncrona
+        self.active_connections[player_name] = websocket
+        await self.broadcast_lobby_status()
+
+    async def disconnect(self, player_name: str):
+        # Remover al jugador si se desconecta o cierra la pestaña
+        if player_name in self.active_connections:
+            del self.active_connections[player_name]
+            await self.broadcast_lobby_status()
+
+    async def broadcast_lobby_status(self):
+        """Envía a todos los conectados la lista actual de jugadores en tiempo real."""
+        lista_jugadores = list(self.active_connections.keys())
+        payload = {
+            "tipo": "actualizacion_sala",
+            "total": len(lista_jugadores),
+            "jugadores": lista_jugadores
+        }
+        
+        # Enviar mensaje asíncrono a cada uno
+        for connection in self.active_connections.values():
+            try:
+                await connection.send_text(json.dumps(payload))
+            except Exception:
+                pass
+
+        # 🚀 REGLA DE INICIO AUTOMÁTICO:
+        # Para sustentar rápido ante el docente, iniciamos juego con 2 jugadores conectados
+        if len(lista_jugadores) >= 2:
+            await self.broadcast_start_game()
+
+    async def broadcast_start_game(self):
+        """Da la orden de ejecución inmediata a los navegadores para saltar a la partida."""
+        payload = {"action": "START_GAME"}
+        for connection in self.active_connections.values():
+            try:
+                await connection.send_text(json.dumps(payload))
+            except Exception:
+                pass
+
+# Instanciamos el manager global del lobby
+lobby_manager = LobbyManager()
+
+
+# =====================================================================
 # 🏠 SISTEMA DE RUTAS WEB (FRONTEND INTEGRADO)
 # =====================================================================
-
 def cargar_template(nombre_archivo: str) -> str:
-    """Función auxiliar para leer de forma segura los archivos HTML."""
     try:
         with open(f"templates/{nombre_archivo}", "r", encoding="utf-8") as file:
             return file.read()
@@ -93,9 +146,24 @@ async def read_perdedor():
 
 
 # =====================================================================
-# 🔐 ENDPOINTS DE LA API (AUTENTICACIÓN & LÓGICA)
+# ⚡ ENDPOINTS WEBSOCKET
 # =====================================================================
+@app.websocket("/ws/lobby/{player_name}")
+async def websocket_lobby_endpoint(websocket: WebSocket, player_name: str):
+    # Gestionar la entrada del jugador al canal síncrono
+    await lobby_manager.connect(websocket, player_name)
+    try:
+        while True:
+            # Mantener el canal abierto escuchando latidos o mensajes del cliente
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        # Detectar de inmediato si el jugador se sale
+        await lobby_manager.disconnect(player_name)
 
+
+# =====================================================================
+# 🔐 ENDPOINTS DE LA API (AUTENTICACIÓN)
+# =====================================================================
 @app.post("/auth/register")
 async def register(user: UserRegister):
     async with httpx.AsyncClient() as client:
