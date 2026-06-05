@@ -190,3 +190,61 @@ async def websocket_lobby_endpoint(websocket: WebSocket, player_name: str):
     except Exception:
         await lobby_manager.disconnect(player_name)
  
+ 
+# =====================================================================
+# 🔐 ENDPOINTS DE LA API (AUTENTICACIÓN)
+# =====================================================================
+@app.post("/auth/register")
+async def register(user: UserRegister):
+    async with httpx.AsyncClient() as client:
+        try:
+            url_check = f"{SUPABASE_URL}/rest/v1/usuarios?username=eq.{user.username}"
+            res_check = await client.get(url_check, headers=HEADERS)
+            
+            if res_check.status_code != 200:
+                raise HTTPException(status_code=res_check.status_code, detail="Error de comunicación con DB.")
+            
+            if len(res_check.json()) > 0:
+                raise HTTPException(status_code=400, detail="Ese usuario ya está registrado, bro.")
+            
+            url_insert = f"{SUPABASE_URL}/rest/v1/usuarios"
+            payload = {"username": user.username, "player_name": user.player_name, "password": user.password}
+            res_insert = await client.post(url_insert, headers=HEADERS, json=payload)
+            
+            if res_insert.status_code not in [200, 201]:
+                raise HTTPException(status_code=res_insert.status_code, detail="Error al guardar usuario.")
+                
+            return {"message": "¡Usuario registrado con éxito!", "user": user.username}
+        except HTTPException as http_ex:
+            raise http_ex
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+ 
+@app.post("/auth/login")
+async def login(user: UserLogin):
+    async with httpx.AsyncClient() as client:
+        try:
+            url_login = f"{SUPABASE_URL}/rest/v1/usuarios?username=eq.{user.username}"
+            res = await client.get(url_login, headers=HEADERS)
+            
+            if res.status_code != 200:
+                raise HTTPException(status_code=res.status_code, detail="Error en consulta.")
+                
+            datos = res.json()
+            if len(datos) == 0:
+                raise HTTPException(status_code=404, detail="Ese usuario no existe, mano.")
+                
+            db_user = datos[0]
+            if db_user["password"] != user.password:
+                raise HTTPException(status_code=401, detail="Contraseña incorrecta, pa.")
+                
+            return {
+                "message": "¡Ingreso exitoso!",
+                "player_name": db_user["player_name"],
+                "username": db_user["username"]
+            }
+        except HTTPException as http_ex:
+            raise http_ex
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+ 
