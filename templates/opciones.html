@@ -88,6 +88,7 @@
             font-size: 15px;
             font-weight: 600;
             border-radius: 6px;
+            cursor: pointer; /* Cambio a cursor pointer */
             transition: all 0.2s ease;
         }
 
@@ -270,12 +271,13 @@
             <nav>
                 <ul class="nav-menu">
                     <li>
-                        <a href="#" class="nav-item inactive">
+                        <!-- 🔥 CORRECCIÓN: Ahora te redirige de vuelta al menú / lobby principal -->
+                        <a href="/menu" class="nav-item inactive">
                             <span>🎮</span> Jugar en Línea
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="nav-item active">
+                        <a href="/opciones" class="nav-item active">
                             <span>⚙️</span> Opciones
                         </a>
                     </li>
@@ -283,14 +285,16 @@
             </nav>
         </div>
 
-        <a href="#" class="logout-btn">
+        <!-- 🔥 CORRECCIÓN: Se agrega ID único para controlar el cierre de sesión en JS -->
+        <div id="logoutBtn" class="logout-btn">
             <span>🚪</span> Cerrar Sesión
-        </a>
+        </div>
     </aside>
 
     <main class="main-content">
         
-        <h2 class="user-greeting">Hola, [Nombre_Jugador]</h2>
+        <!-- 🔥 DINÁMICO: Cambiado a ID para renderizar el nombre real desde el localStorage -->
+        <h2 class="user-greeting" id="userGreeting">Hola, Jugador</h2>
         
         <div class="card-container">
             <div class="options-card">
@@ -343,6 +347,24 @@
         </div>
 
     </main>
+
+    <!-- 🔥 LÓGICA JAVASCRIPT RECONECTADA -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Cargar el nombre del jugador en el saludo superior
+            const storedName = localStorage.getItem('player_name');
+            if (storedName) {
+                // Removemos guiones bajos si los tenía en el almacenamiento para que se vea estético
+                document.getElementById('userGreeting').innerText = `Hola, ${storedName.replace(/_/g, ' ')}`;
+            }
+
+            // 2. Control interactivo de Cierre de Sesión (Logout funcional)
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                localStorage.clear();
+                window.location.href = "/";
+            });
+        });
+    </script>
 
 </body>
 </html>
