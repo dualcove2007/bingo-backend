@@ -120,9 +120,8 @@
         .status-dot {
             width: 10px;
             height: 10px;
-            background-color: #ffb800; /* Amarillo inicial "Conectando" */
+            background-color: #ffb800; /* Amarillo inicial de "Conectando..." */
             border-radius: 50%;
-            animation: pulse 1.5s infinite;
         }
 
         .status-text {
@@ -158,7 +157,6 @@
             margin-bottom: 30px;
         }
 
-        /* Contenedor dinámico de la lista de jugadores conectados */
         .players-list {
             display: flex;
             flex-direction: column;
@@ -186,21 +184,6 @@
             height: 6px;
             background-color: #b5ff60;
             border-radius: 50%;
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(0.9);
-                opacity: 0.6;
-            }
-            50% {
-                transform: scale(1.1);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(0.9);
-                opacity: 0.6;
-            }
         }
     </style>
 </head>
@@ -245,112 +228,115 @@
             </p>
 
             <div class="players-list" id="playersList">
-                <p style="color: #566488; text-align: center; font-size: 13px;">Buscando otros jugadores...</p>
-            </div>
+                </div>
         </div>
         
     </main>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // 1. Capturar el nombre real del jugador desde el almacenamiento local
             const playerName = localStorage.getItem('player_name') || "Jugador_Anonimo";
+            // Sanitizar la cadena eliminando espacios redundantes por guiones bajos
             const sanitizedName = playerName.trim().replace(/\s+/g, '_');
 
-            // Manejo del Logout
+            // Manejador del botón de cerrar sesión
             document.getElementById('logoutBtn').addEventListener('click', () => {
                 localStorage.clear();
                 window.location.href = "/";
             });
 
-            // Configuración base de URLs dinámicas
+            // 2. CONSTRUCCIÓN EXACTA DE LA URL WEBSOCKET PARA RENDER
             const loc = window.location;
-            let wsUri = loc.protocol === "https:" ? "wss://" : "ws://";
-            wsUri += loc.host + "/ws/lobby/" + sanitizedName;
+            const protocol = loc.protocol === "https:" ? "wss://" : "ws://";
+            // Forzamos explícitamente el uso de la barra diagonal de separación
+            const wsUri = `${protocol}${loc.host}/ws/lobby/${sanitizedName}`;
 
-            console.log("Intentando conectar canal WebSocket en: ", wsUri);
-
-            let socket;
-            let pingInterval; // Guardará el temporizador del latido
+            console.log("Intentando abrir canal de tiempo real en:", wsUri);
 
             const statusDot = document.getElementById('statusDot');
             const statusText = document.getElementById('statusText');
             const lobbyCount = document.getElementById('lobbyCount');
             const playersList = document.getElementById('playersList');
 
+            let socket;
+            let pingInterval;
+
             function conectarWebSocket() {
-                socket = new WebSocket(wsUri);
+                try {
+                    socket = new WebSocket(wsUri);
 
-                // Cuando se abre la conexión con éxito
-                socket.onopen = () => {
-                    console.log("✅ Conexión establecida con éxito.");
-                    statusDot.style.backgroundColor = "#b5ff60"; // Verde neón definitivo
-                    statusText.style.color = "#b5ff60";
-                    statusText.innerText = "Conexión Segura Establecida";
+                    // Evento cuando se conecta de forma segura
+                    socket.onopen = () => {
+                        console.log("✅ Conectado exitosamente.");
+                        statusDot.style.backgroundColor = "#b5ff60"; // Cambia a verde neón
+                        statusText.style.color = "#b5ff60";
+                        statusText.innerText = "Conectado a la sala";
 
-                    // 🔥 LATIDO ANTIDESTRUCCIÓN DE RENDER:
-                    // Enviamos un "PING" al backend cada 10 segundos para que Render no asuma inactividad.
-                    if (pingInterval) clearInterval(pingInterval);
-                    pingInterval = setInterval(() => {
-                        if (socket.readyState === WebSocket.OPEN) {
-                            socket.send("PING");
-                            console.log("🛰️ Enviando PING de mantenimiento a Render...");
+                        // 🔥 LATIDO HEARTBEAT (Mantiene caliente el proxy intermedio de Render)
+                        if (pingInterval) clearInterval(pingInterval);
+                        pingInterval = setInterval(() => {
+                            if (socket.readyState === WebSocket.OPEN) {
+                                socket.send("PING");
+                            }
+                        }, 8000);
+                    };
+
+                    // Evento cuando el servidor transmite datos de la sala
+                    socket.onmessage = (event) => {
+                        // Ignorar ecos de control
+                        if (event.data === "PONG") return;
+
+                        try {
+                            const data = JSON.parse(event.data);
+
+                            // Actualizar la lista visual de competidores en pantalla
+                            if (data.tipo === "actualizacion_sala") {
+                                const listaHtml = data.jugadores.map(p => `
+                                    <div class="player-row">
+                                        <span class="dot"></span>
+                                        <span>${p.replace(/_/g, ' ')}</span>
+                                    </div>
+                                `).join('');
+                                
+                                playersList.innerHTML = listaHtml;
+                                lobbyCount.innerText = `Jugadores en la sala: ${data.total}`;
+                            }
+
+                            // Orden de inicio asíncrono para saltar al tablero
+                            if (data.action === "START_GAME") {
+                                if (pingInterval) clearInterval(pingInterval);
+                                alert("¡Sala llena, mano! La partida comienza ya.");
+                                window.location.href = "/juego";
+                            }
+                        } catch (e) {
+                            console.error("Error parseando el JSON:", e);
                         }
-                    }, 10000);
-                };
+                    };
 
-                // Cuando el backend nos envía datos de la sala en tiempo real
-                socket.onmessage = (event) => {
-                    // Ignorar respuestas vacías o ecos de control si existiesen
-                    if (event.data === "PONG") return;
+                    // Evento si el servidor corta el canal
+                    socket.onclose = () => {
+                        if (pingInterval) clearInterval(pingInterval);
+                        
+                        statusDot.style.backgroundColor = "#ff6b6b"; // Vuelve a ponerse en rojo error
+                        statusText.style.color = "#ff6b6b";
+                        statusText.innerText = "Desconectado de la sala";
 
-                    try {
-                        const data = JSON.parse(event.data);
+                        // Reconexión automática pasados 3 segundos
+                        setTimeout(conectarWebSocket, 3000);
+                    };
 
-                        // Si recibimos una actualización de la lista de jugadores
-                        if (data.tipo === "actualizacion_sala") {
-                            const listaHtml = data.jugadores.map(p => `
-                                <div class="player-row">
-                                    <span class="dot"></span>
-                                    <span>${p.replace(/_/g, ' ')}</span>
-                                </div>
-                            `).join('');
-                            
-                            playersList.innerHTML = listaHtml;
-                            lobbyCount.innerText = `Jugadores en la sala: ${data.total}`;
-                        }
+                    socket.onerror = (error) => {
+                        console.error("Error nativo en el WebSocket:", error);
+                        socket.close();
+                    };
 
-                        // Si el servidor da la orden de arrancar la partida
-                        if (data.action === "START_GAME") {
-                            if (pingInterval) clearInterval(pingInterval);
-                            alert("¡Sala llena, mano! La partida comienza ya.");
-                            window.location.href = "/juego";
-                        }
-                    } catch (e) {
-                        console.error("Error parseando JSON del servidor: ", e);
-                    }
-                };
-
-                // Si se cae la conexión o Render parpadea
-                socket.onclose = () => {
-                    console.warn("⚠️ WebSocket cerrado. Limpiando intervalos...");
-                    if (pingInterval) clearInterval(pingInterval);
-
-                    statusDot.style.backgroundColor = "#ff6b6b"; // Rojo error
-                    statusText.style.color = "#ff6b6b";
-                    statusText.innerText = "Desconectado de la sala";
-
-                    // 🔥 RECONEXIÓN AUTOMÁTICA DE EMERGENCIA
-                    console.log("🔄 Intentando reconexión en 3 segundos...");
-                    setTimeout(conectarWebSocket, 3000);
-                };
-
-                socket.onerror = (error) => {
-                    console.error("❌ Error detectado en WebSocket:", error);
-                    socket.close(); // Forzamos el cierre para activar la reconexión limpia
-                };
+                } catch (err) {
+                    console.error("Error crítico de instancia:", err);
+                }
             }
 
-            // Inicializar la conexión apenas cargue el DOM
+            // Iniciar conexión automática al ingresar a la vista
             conectarWebSocket();
         });
     </script>
