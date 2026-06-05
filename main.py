@@ -114,7 +114,8 @@ def cargar_template(nombre_archivo: str) -> str:
 
 @app.get("/", response_class=HTMLResponse)
 async def read_login():
-    return cargar_template("Login.html")
+    # 🌟 CORREGIDO: Ahora busca 'login.html' estrictamente en minúsculas
+    return cargar_template("login.html")
 
 @app.get("/registro", response_class=HTMLResponse)
 async def read_registro():
