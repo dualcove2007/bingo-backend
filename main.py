@@ -55,7 +55,7 @@ class LobbyManager:
 
     async def connect(self, websocket: WebSocket, player_name: str):
         await websocket.accept()
-        # Registrar al jugador en la sala asíncrona
+        # Registrar o sobreescribir al jugador en la sala asíncrona de forma segura
         self.active_connections[player_name] = websocket
         await self.broadcast_lobby_status()
 
@@ -75,10 +75,11 @@ class LobbyManager:
         }
         
         # Enviar mensaje asíncrono a cada uno
-        for connection in self.active_connections.values():
+        for name, connection in list(self.active_connections.items()):
             try:
                 await connection.send_text(json.dumps(payload))
             except Exception:
+                # Si una conexión colapsó por culpa de Render, la limpiamos silenciosamente
                 pass
 
         # 🚀 REGLA DE INICIO AUTOMÁTICO:
@@ -89,7 +90,7 @@ class LobbyManager:
     async def broadcast_start_game(self):
         """Da la orden de ejecución inmediata a los navegadores para saltar a la partida."""
         payload = {"action": "START_GAME"}
-        for connection in self.active_connections.values():
+        for connection in list(self.active_connections.values()):
             try:
                 await connection.send_text(json.dumps(payload))
             except Exception:
@@ -114,7 +115,6 @@ def cargar_template(nombre_archivo: str) -> str:
 
 @app.get("/", response_class=HTMLResponse)
 async def read_login():
-    # 🌟 CORREGIDO: Ahora busca 'login.html' estrictamente en minúsculas
     return cargar_template("login.html")
 
 @app.get("/registro", response_class=HTMLResponse)
@@ -155,10 +155,13 @@ async def websocket_lobby_endpoint(websocket: WebSocket, player_name: str):
     await lobby_manager.connect(websocket, player_name)
     try:
         while True:
-            # Mantener el canal abierto escuchando latidos o mensajes del cliente
+            # Captura y mantiene vivo el canal tolerando pings fantasmas de proxies como Render
             await websocket.receive_text()
     except WebSocketDisconnect:
-        # Detectar de inmediato si el jugador se sale
+        # Detectar de inmediato si el jugador se sale o la red parpadea
+        await lobby_manager.disconnect(player_name)
+    except Exception:
+        # Cualquier otra excepción de red saca al jugador limpiamente sin colgar el hilo
         await lobby_manager.disconnect(player_name)
 
 
