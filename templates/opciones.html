@@ -302,7 +302,7 @@
                 <div class="option-row switch-container">
                     <span>Efectos de Sonido (Cantar Balotas)</span>
                     <label class="switch">
-                        <input type="checkbox" checked>
+                        <input type="checkbox" id="soundSwitch" checked>
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -313,27 +313,27 @@
  
                 <div class="game-mode-section">
                     <label class="radio-label">
-                        <input type="radio" name="game-mode">
+                        <input type="radio" name="game-mode" value="en_x">
                         <span class="checkmark"></span>
                         En X
                     </label>
                     
                     <label class="radio-label">
-                        <input type="radio" name="game-mode">
+                        <input type="radio" name="game-mode" value="en_o">
                         <span class="checkmark"></span>
                         En O
                     </label>
                     
                     <label class="radio-label">
-                        <input type="radio" name="game-mode">
+                        <input type="radio" name="game-mode" value="en_l">
                         <span class="checkmark"></span>
                         En L
                     </label>
                     
                     <label class="radio-label carton-lleno">
-                        <input type="radio" name="game-mode" checked>
+                        <input type="radio" name="game-mode" value="carton_lleno">
                         <span class="checkmark"></span>
-                        Carton lleno
+                        Cartón Lleno
                     </label>
                 </div>
  
@@ -356,7 +356,7 @@
             }
  
             const modeValues = ["en_x", "en_o", "en_l", "carton_lleno"];
-            const radios = document.querySelectorAll("input[name=",game-mode,"]");
+            const radios = document.querySelectorAll('input[name="game-mode"]');
             const savedMode = localStorage.getItem("game_mode") || "carton_lleno";
  
             radios.forEach((radio, i) => {
@@ -367,7 +367,7 @@
                 });
             });
  
-            const soundSwitch = document.querySelector("input[type=",checkbox,"]");
+            const soundSwitch = document.getElementById('soundSwitch');
             const savedSound = localStorage.getItem("sound_enabled");
             if (savedSound !== null) soundSwitch.checked = savedSound === "true";
             soundSwitch.addEventListener("change", () => {
