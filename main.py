@@ -58,8 +58,8 @@ class LobbyManager:
     async def connect(self, websocket: WebSocket, player_name: str):
         await websocket.accept()
         self.active_connections[player_name] = websocket
-        # Solo enviamos actualización de sala al conectar, sin disparar START_GAME aquí
         await self._broadcast_status_only()
+        await self.check_and_start_game()
  
     async def disconnect(self, player_name: str):
         if player_name in self.active_connections:
