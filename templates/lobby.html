@@ -237,22 +237,19 @@
         document.addEventListener('DOMContentLoaded', () => {
             // 1. Capturar el nombre real del jugador desde el almacenamiento local
             const playerName = localStorage.getItem('player_name') || "Jugador_Anonimo";
-            // Sanitizar la cadena eliminando espacios redundantes por guiones bajos
             const sanitizedName = playerName.trim().replace(/\s+/g, '_');
 
-            // Manejador del botón de cerrar sesión
             document.getElementById('logoutBtn').addEventListener('click', () => {
                 localStorage.clear();
                 window.location.href = "/";
             });
 
-            // 2. CONSTRUCCIÓN EXACTA DE LA URL WEBSOCKET PARA RENDER
+            // 2. Construcción de URL WebSocket
             const loc = window.location;
             const protocol = loc.protocol === "https:" ? "wss://" : "ws://";
-            // Forzamos explícitamente el uso de la barra diagonal de separación
             const wsUri = `${protocol}${loc.host}/ws/lobby/${sanitizedName}`;
 
-            console.log("Intentando abrir canal de tiempo real en:", wsUri);
+            console.log("Conectando a:", wsUri);
 
             const statusDot = document.getElementById('statusDot');
             const statusText = document.getElementById('statusText');
@@ -261,36 +258,49 @@
 
             let socket;
             let pingInterval;
+            // FIX BUG #3: contador de intentos para backoff de reconexión
+            let reconnectAttempts = 0;
 
             function conectarWebSocket() {
+                // Evitar crear múltiples sockets si ya hay uno conectando/abierto
+                if (socket && (socket.readyState === WebSocket.CONNECTING || socket.readyState === WebSocket.OPEN)) {
+                    return;
+                }
+
                 try {
                     socket = new WebSocket(wsUri);
 
-                    // Evento cuando se conecta de forma segura
                     socket.onopen = () => {
                         console.log("✅ Conectado exitosamente.");
-                        statusDot.style.backgroundColor = "#b5ff60"; // Cambia a verde neón
+                        reconnectAttempts = 0; // Resetear contador al conectar exitosamente
+                        statusDot.style.backgroundColor = "#b5ff60";
                         statusText.style.color = "#b5ff60";
                         statusText.innerText = "Conectado a la sala";
 
-                        // 🔥 LATIDO HEARTBEAT (Mantiene caliente el proxy intermedio de Render)
+                        // FIX BUG #1: Enviamos PING después de un delay corto.
+                        // El servidor usa la recepción de este mensaje para evaluar si iniciar partida,
+                        // garantizando que el cliente ya registró su onmessage y está listo.
+                        setTimeout(() => {
+                            if (socket.readyState === WebSocket.OPEN) {
+                                socket.send("PING");
+                            }
+                        }, 400);
+
+                        // FIX BUG #3: Heartbeat cada 20s (Render cierra conexiones a los ~55s sin actividad)
                         if (pingInterval) clearInterval(pingInterval);
                         pingInterval = setInterval(() => {
                             if (socket.readyState === WebSocket.OPEN) {
                                 socket.send("PING");
                             }
-                        }, 8000);
+                        }, 20000);
                     };
 
-                    // Evento cuando el servidor transmite datos de la sala
                     socket.onmessage = (event) => {
-                        // Ignorar ecos de control
                         if (event.data === "PONG") return;
 
                         try {
                             const data = JSON.parse(event.data);
 
-                            // Actualizar la lista visual de competidores en pantalla
                             if (data.tipo === "actualizacion_sala") {
                                 const listaHtml = data.jugadores.map(p => `
                                     <div class="player-row">
@@ -298,45 +308,50 @@
                                         <span>${p.replace(/_/g, ' ')}</span>
                                     </div>
                                 `).join('');
-                                
                                 playersList.innerHTML = listaHtml;
                                 lobbyCount.innerText = `Jugadores en la sala: ${data.total}`;
                             }
 
-                            // Orden de inicio asíncrono para saltar al tablero
                             if (data.action === "START_GAME") {
                                 if (pingInterval) clearInterval(pingInterval);
+                                // FIX BUG #2: marcamos que la redirección es intencional
+                                // para que el onclose no intente reconectar
+                                window._redirectingToGame = true;
                                 alert("¡Sala llena, mano! La partida comienza ya.");
                                 window.location.href = "/juego";
                             }
                         } catch (e) {
-                            console.error("Error parseando el JSON:", e);
+                            console.error("Error parseando mensaje:", e);
                         }
                     };
 
-                    // Evento si el servidor corta el canal
                     socket.onclose = () => {
                         if (pingInterval) clearInterval(pingInterval);
-                        
-                        statusDot.style.backgroundColor = "#ff6b6b"; // Vuelve a ponerse en rojo error
-                        statusText.style.color = "#ff6b6b";
-                        statusText.innerText = "Desconectado de la sala";
 
-                        // Reconexión automática pasados 3 segundos
-                        setTimeout(conectarWebSocket, 3000);
+                        // FIX BUG #2: Si cerramos por START_GAME, no reconectar
+                        if (window._redirectingToGame) return;
+
+                        statusDot.style.backgroundColor = "#ff6b6b";
+                        statusText.style.color = "#ff6b6b";
+                        statusText.innerText = "Reconectando...";
+
+                        // FIX BUG #3: Backoff — Render free puede tardar varios segundos en despertar
+                        const delay = reconnectAttempts < 3 ? 3000 : 8000;
+                        reconnectAttempts++;
+                        console.log(`Reintento #${reconnectAttempts} en ${delay/1000}s`);
+                        setTimeout(conectarWebSocket, delay);
                     };
 
                     socket.onerror = (error) => {
-                        console.error("Error nativo en el WebSocket:", error);
-                        socket.close();
+                        console.error("Error en WebSocket:", error);
+                        // No cerramos manualmente: onclose se dispara solo después de onerror
                     };
 
                 } catch (err) {
-                    console.error("Error crítico de instancia:", err);
+                    console.error("Error crítico al crear WebSocket:", err);
                 }
             }
 
-            // Iniciar conexión automática al ingresar a la vista
             conectarWebSocket();
         });
     </script>
