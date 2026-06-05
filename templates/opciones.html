@@ -12,7 +12,7 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
+ 
         body {
             background-color: #0b0f19; /* Fondo oscuro profundo */
             min-height: 100vh;
@@ -20,7 +20,7 @@
             color: #ffffff;
             overflow: hidden;
         }
-
+ 
         /* --- BARRA LATERAL (SIDEBAR) --- */
         .sidebar {
             width: 240px;
@@ -31,27 +31,27 @@
             padding: 30px 20px;
             flex-shrink: 0;
         }
-
+ 
         .sidebar-top {
             display: flex;
             flex-direction: column;
             gap: 50px;
         }
-
+ 
         .logo {
             font-size: 18px;
             font-weight: 700;
             letter-spacing: 1px;
             padding-left: 10px;
         }
-
+ 
         .nav-menu {
             display: flex;
             flex-direction: column;
             gap: 20px;
             list-style: none;
         }
-
+ 
         .nav-item {
             display: flex;
             align-items: center;
@@ -63,21 +63,21 @@
             border-radius: 6px;
             transition: all 0.2s ease;
         }
-
+ 
         /* Pestaña Opciones activa */
         .nav-item.active {
             color: #b5ff60; /* Verde neón */
         }
-
+ 
         .nav-item.inactive {
             color: #5d6b89;
         }
-
+ 
         .nav-item.inactive:hover {
             color: #ffffff;
             background-color: #232d4a;
         }
-
+ 
         .logout-btn {
             display: flex;
             align-items: center;
@@ -91,13 +91,13 @@
             cursor: pointer; /* Cambio a cursor pointer */
             transition: all 0.2s ease;
         }
-
+ 
         .logout-btn:hover {
             color: #ff6b6b;
             background-color: #232d4a;
         }
-
-
+ 
+ 
         /* --- CONTENIDO PRINCIPAL --- */
         .main-content {
             flex: 1;
@@ -107,7 +107,7 @@
             justify-content: space-between;
             align-items: flex-end; 
         }
-
+ 
         /* Saludo superior derecho */
         .user-greeting {
             font-size: 24px;
@@ -115,7 +115,7 @@
             color: #ffffff;
             letter-spacing: 0.5px;
         }
-
+ 
         /* Contenedor central */
         .card-container {
             width: 100%;
@@ -125,7 +125,7 @@
             align-items: center;
             padding-bottom: 40px;
         }
-
+ 
         /* Tarjeta de Opciones */
         .options-card {
             background-color: #14192d;
@@ -139,7 +139,7 @@
             flex-direction: column;
             gap: 28px;
         }
-
+ 
         /* Filas con viñeta estilo punto */
         .option-row {
             display: flex;
@@ -150,7 +150,7 @@
             font-weight: 700;
             color: #ffffff;
         }
-
+ 
         .option-row::before {
             content: "•";
             color: #ffffff;
@@ -160,13 +160,13 @@
             top: 50%;
             transform: translateY(-53%);
         }
-
+ 
         /* Fila del Switch */
         .switch-container {
             justify-content: space-between;
             width: 100%;
         }
-
+ 
         /* --- SWITCH DE SONIDO --- */
         .switch {
             position: relative;
@@ -174,13 +174,13 @@
             width: 76px;
             height: 38px;
         }
-
+ 
         .switch input {
             opacity: 0;
             width: 0;
             height: 0;
         }
-
+ 
         .slider {
             position: absolute;
             cursor: pointer;
@@ -192,7 +192,7 @@
             transition: .3s;
             border-radius: 34px;
         }
-
+ 
         .slider::before {
             position: absolute;
             content: "";
@@ -204,15 +204,15 @@
             transition: .3s;
             border-radius: 50%;
         }
-
+ 
         input:checked + .slider {
             background-color: #00e6a6; /* Verde turquesa */
         }
-
+ 
         input:checked + .slider::before {
             transform: translateX(38px);
         }
-
+ 
         /* --- SECCIÓN DE RADIO BUTTONS CORREGIDA --- */
         .game-mode-section {
             display: flex;
@@ -220,7 +220,7 @@
             gap: 16px;
             padding-left: 18px;
         }
-
+ 
         .radio-label {
             display: flex;
             align-items: center;
@@ -231,14 +231,14 @@
             color: #ffffff;
             user-select: none;
         }
-
+ 
         /* Ocultar radio nativo */
         .radio-label input {
             position: absolute;
             opacity: 0;
             cursor: pointer;
         }
-
+ 
         /* Círculo falso por defecto (Gris apagado para todos) */
         .checkmark {
             height: 24px;
@@ -247,12 +247,12 @@
             border-radius: 50%;
             transition: background-color 0.2s ease;
         }
-
+ 
         /* Al seleccionar las opciones normales, cambian a BLANCO */
         .radio-label input:checked ~ .checkmark {
             background-color: #ffffff; 
         }
-
+ 
         /* Texto informativo inferior */
         .info-text {
             font-size: 14px;
@@ -263,7 +263,7 @@
     </style>
 </head>
 <body>
-
+ 
     <aside class="sidebar">
         <div class="sidebar-top">
             <div class="logo">BINGO</div>
@@ -284,13 +284,13 @@
                 </ul>
             </nav>
         </div>
-
+ 
         <!-- 🔥 CORRECCIÓN: Se agrega ID único para controlar el cierre de sesión en JS -->
         <div id="logoutBtn" class="logout-btn">
             <span>🚪</span> Cerrar Sesión
         </div>
     </aside>
-
+ 
     <main class="main-content">
         
         <!-- 🔥 DINÁMICO: Cambiado a ID para renderizar el nombre real desde el localStorage -->
@@ -306,11 +306,11 @@
                         <span class="slider"></span>
                     </label>
                 </div>
-
+ 
                 <div class="option-row">
                     <span>Modo de juego asignado:</span>
                 </div>
-
+ 
                 <div class="game-mode-section">
                     <label class="radio-label">
                         <input type="radio" name="game-mode">
@@ -336,35 +336,50 @@
                         Carton lleno
                     </label>
                 </div>
-
+ 
                 <div class="option-row">
                     <p class="info-text">
                         El servidor validará el cartón inmediatamente al recibir el comando BINGO.
                     </p>
                 </div>
-
+ 
             </div>
         </div>
-
+ 
     </main>
-
-    <!-- 🔥 LÓGICA JAVASCRIPT RECONECTADA -->
+ 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // 1. Cargar el nombre del jugador en el saludo superior
-            const storedName = localStorage.getItem('player_name');
+        document.addEventListener("DOMContentLoaded", () => {
+            const storedName = localStorage.getItem("player_name");
             if (storedName) {
-                // Removemos guiones bajos si los tenía en el almacenamiento para que se vea estético
-                document.getElementById('userGreeting').innerText = `Hola, ${storedName.replace(/_/g, ' ')}`;
+                document.getElementById("userGreeting").innerText = "Hola, " + storedName.replace(/_/g, " ");
             }
-
-            // 2. Control interactivo de Cierre de Sesión (Logout funcional)
-            document.getElementById('logoutBtn').addEventListener('click', () => {
+ 
+            const modeValues = ["en_x", "en_o", "en_l", "carton_lleno"];
+            const radios = document.querySelectorAll("input[name=",game-mode,"]");
+            const savedMode = localStorage.getItem("game_mode") || "carton_lleno";
+ 
+            radios.forEach((radio, i) => {
+                radio.value = modeValues[i];
+                radio.checked = (modeValues[i] === savedMode);
+                radio.addEventListener("change", () => {
+                    localStorage.setItem("game_mode", radio.value);
+                });
+            });
+ 
+            const soundSwitch = document.querySelector("input[type=",checkbox,"]");
+            const savedSound = localStorage.getItem("sound_enabled");
+            if (savedSound !== null) soundSwitch.checked = savedSound === "true";
+            soundSwitch.addEventListener("change", () => {
+                localStorage.setItem("sound_enabled", soundSwitch.checked.toString());
+            });
+ 
+            document.getElementById("logoutBtn").addEventListener("click", () => {
                 localStorage.clear();
                 window.location.href = "/";
             });
         });
     </script>
-
+ 
 </body>
 </html>
