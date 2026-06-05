@@ -135,7 +135,7 @@
     </div>
 
     <script>
-        // TRUCO PRO: Toma automáticamente la URL del host donde está corriendo (Render o Local)
+        // Captura automáticamente la URL actual del host (sea local o nube)
         const BACKEND_URL = window.location.origin;
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -158,10 +158,12 @@
                 if (response.ok) {
                     alert(`¡Bienvenido de vuelta, ${data.player_name || username}! Ingresando a la sala...`);
                     
+                    // Almacenamos la sesión de manera segura para usar los datos en el menú
                     localStorage.setItem('username', data.username || username);
                     localStorage.setItem('player_name', data.player_name || "Jugador");
 
-                    // Aquí redireccionaremos a la sala de juego en el futuro (ej: window.location.href = "/sala";)
+                    // 🚀 REDIRECCIÓN AUTOMÁTICA ACTIVA: Ahora salta directo al Menú unificado
+                    window.location.href = "/menu";
                 } else {
                     alert(`Error: ${data.detail || "Credenciales incorrectas."}`);
                 }

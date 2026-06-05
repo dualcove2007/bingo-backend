@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo - Vista Juego</title>
+    <style>
+        /* --- RESET GENERAL --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Ajuste estricto para evitar scroll en el navegador */
+        body {
+            background-color: #0b0f19; /* Fondo oscuro profundo */
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            padding: 15px;
+        }
+
+        /* --- DISPLAY BALOTA SUPERIOR (B-12) --- */
+        .called-ball-display {
+            background-color: #1a2238; /* Azul grisáceo de tus tarjetas */
+            width: 160px;
+            padding: 16px 0;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 35px; /* Separación limpia */
+        }
+
+        .called-ball-text {
+            color: #b5ff60; /* Verde neón */
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- CONTENEDOR DEL CARTÓN (TABLERO) --- */
+        .bingo-board {
+            display: flex;
+            flex-direction: column;
+            gap: 12px; /* Separación uniforme entre filas */
+            margin-bottom: 40px;
+        }
+
+        /* Filas de la cuadrícula */
+        .bingo-row {
+            display: flex;
+            gap: 12px; /* Separación uniforme entre columnas */
+        }
+
+        /* --- ESTILO BASE DE LAS CASILLAS --- */
+        .grid-cell {
+            width: 54px;   /* Tamaño balanceado para pantallas de laptop sin romper alto */
+            height: 54px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            font-weight: 700;
+            user-select: none;
+            transition: all 0.15s ease;
+        }
+
+        /* Cabecera original: Letras blancas con fondo azul brillante */
+        .header-cell {
+            background-color: #0d57ff; /* Azul rey original de tu diseño */
+            color: #ffffff;
+            font-size: 18px;
+        }
+
+        /* Casillas de números por defecto (Botones apagados) */
+        .number-cell {
+            background-color: #14192d; /* Azul muy oscuro */
+            color: #ffffff;
+            cursor: pointer;
+        }
+
+        /* Hover sutil para notar que son interactivos */
+        .number-cell:not(.marked):hover {
+            background-color: #1c233f;
+        }
+
+        /* Casilla FREE central por defecto */
+        .free-cell {
+            background-color: #2b3554; /* Color grisáceo/azul opaco original */
+            color: #ffffff;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+        }
+
+        /* --- ESTADO SELECCIONADO (AL HACER CLICK) --- */
+        /* Cambia exactamente al verde turquesa brillante que querías */
+        .number-cell.marked, .free-cell.marked {
+            background-color: #00e6a6; 
+            color: #0b0f19; /* Texto oscuro para contraste */
+        }
+
+        /* --- BOTÓN ¡BINGO! (INFERIOR) --- */
+        .bingo-btn {
+            background-color: #e11d48; /* Rojo exacto de tus capturas */
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 700;
+            padding: 14px 60px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .bingo-btn:hover {
+            background-color: #be123c;
+        }
+
+        .bingo-btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="called-ball-display">
+        <span class="called-ball-text">B-12</span>
+    </div>
+
+    <div class="bingo-board" id="bingoBoard">
+        
+        <div class="bingo-row">
+            <div class="grid-cell header-cell">B</div>
+            <div class="grid-cell header-cell">I</div>
+            <div class="grid-cell header-cell">N</div>
+            <div class="grid-cell header-cell">G</div>
+            <div class="grid-cell header-cell">O</div>
+        </div>
+
+        <div class="bingo-row">
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+        </div>
+
+        <div class="bingo-row">
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+        </div>
+
+        <div class="bingo-row">
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell free-cell">FREE</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+        </div>
+
+        <div class="bingo-row">
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+        </div>
+
+        <div class="bingo-row">
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+        </div>
+
+    </div>
+
+    <button class="bingo-btn">¡BINGO!</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const board = document.getElementById('bingoBoard');
+            // Captura tanto las celdas de números como la celda FREE por si también quieren marcarla
+            const interactiveCells = board.querySelectorAll('.number-cell, .free-cell');
+
+            interactiveCells.forEach(cell => {
+                cell.addEventListener('click', () => {
+                    // Alterna el color turquesa al presionar
+                    cell.classList.toggle('marked');
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

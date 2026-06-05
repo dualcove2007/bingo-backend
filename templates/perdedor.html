@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo - Fin de la Partida</title>
+    <style>
+        /* --- RESET GENERAL --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0b0f19; /* Fondo oscuro profundo */
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            padding: 15px;
+            position: relative;
+        }
+
+        /* --- DISPLAY BALOTA SUPERIOR (B-12) --- */
+        .called-ball-display {
+            background-color: #1a2238; 
+            width: 160px;
+            padding: 16px 0;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 35px; 
+        }
+
+        .called-ball-text {
+            color: #b5ff60; 
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- CONTENEDOR DEL CARTÓN --- */
+        .bingo-board {
+            display: flex;
+            flex-direction: column;
+            gap: 12px; 
+            margin-bottom: 40px;
+        }
+
+        .bingo-row {
+            display: flex;
+            gap: 12px; 
+        }
+
+        .grid-cell {
+            width: 54px;   
+            height: 54px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            font-weight: 700;
+            user-select: none;
+        }
+
+        .header-cell {
+            background-color: #0d57ff; 
+            color: #ffffff;
+            font-size: 18px;
+        }
+
+        .number-cell {
+            background-color: #14192d; 
+            color: #ffffff;
+        }
+
+        .free-cell {
+            background-color: #2b3554; 
+            color: #ffffff;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- BOTÓN BINGO INFERIOR --- */
+        .bingo-btn {
+            background-color: #e11d48; 
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 700;
+            padding: 14px 60px;
+            border: none;
+            border-radius: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+
+        /* ==========================================================================
+           --- VENTANA FLOTANTE DE DERROTA (MODAL FIN DE LA PARTIDA) ---
+           ========================================================================== */
+        
+        /* Capa oscura translúcida de fondo */
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(5, 7, 12, 0.75); /* Opaca el fondo un 75% */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        /* Tarjeta Central del Modal */
+        .defeat-card {
+            background-color: #1e2640; /* Gris azulado de la tarjeta */
+            border: 1px solid #2b3554;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 440px;
+            padding: 40px 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Contenedor del título y el ícono de equis */
+        .defeat-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .cross-icon {
+            font-size: 32px; 
+            line-height: 1;
+        }
+
+        .defeat-title {
+            color: #ffffff; /* Título en blanco puro */
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* Texto explicativo con salto de línea natural */
+        .defeat-message {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.5;
+            max-width: 300px;
+            margin-bottom: 30px;
+        }
+
+        /* Botón VOLVER AL MENU (Estilo Desactivado/Oscuro) */
+        .return-menu-btn {
+            background-color: #2b3554; /* Color azul grisáceo oscuro */
+            color: #ffffff; /* Texto blanco */
+            font-size: 15px;
+            font-weight: 700;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            width: 100%;
+            max-width: 240px;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .return-menu-btn:hover {
+            background-color: #38456e;
+        }
+
+        .return-menu-btn:active {
+            transform: scale(0.97);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Tablero de juego opacado al fondo -->
+    <div class="called-ball-display">
+        <span class="called-ball-text">B-12</span>
+    </div>
+
+    <div class="bingo-board">
+        <div class="bingo-row">
+            <div class="grid-cell header-cell">B</div>
+            <div class="grid-cell header-cell">I</div>
+            <div class="grid-cell header-cell">N</div>
+            <div class="grid-cell header-cell">G</div>
+            <div class="grid-cell header-cell">O</div>
+        </div>
+        <div class="bingo-row">
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+        </div>
+        <div class="bingo-row">
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+        </div>
+        <div class="bingo-row">
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell free-cell">FREE</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+        </div>
+        <div class="bingo-row">
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+        </div>
+        <div class="bingo-row">
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+            <div class="grid-cell number-cell">24</div>
+        </div>
+    </div>
+
+    <button class="bingo-btn">¡BINGO!</button>
+
+
+    <!-- --- OVERLAY FLOTANTE DE FIN DE LA PARTIDA --- -->
+    <div class="modal-overlay">
+        <div class="defeat-card">
+            
+            <!-- Cabecera con Equis y Título -->
+            <div class="defeat-header">
+                <span class="cross-icon">❌</span>
+                <h1 class="defeat-title">Fin de la partida</h1>
+            </div>
+            
+            <!-- Mensaje de derrota -->
+            <p class="defeat-message">
+                El jugador [nombre del ganador] cantó BINGO primero. Más suerte para la próxima, mano.
+            </p>
+            
+            <!-- Botón de retorno oscuro -->
+            <button class="return-menu-btn">Volver al menú</button>
+
+        </div>
+    </div>
+
+</body>
+</html>

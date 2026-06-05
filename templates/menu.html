@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo - Panel Principal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0b0f19; 
+            min-height: 100vh;
+            display: flex;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        /* --- BARRA LATERAL (SIDEBAR) --- */
+        .sidebar {
+            width: 240px;
+            background-color: #1a2238; 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 30px 20px;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            gap: 50px;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding-left: 10px;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            list-style: none;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item.active {
+            color: #b5ff60; 
+        }
+
+        .nav-item.inactive {
+            color: #5d6b89;
+        }
+
+        .nav-item.inactive:hover {
+            color: #ffffff;
+            background-color: #232d4a;
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            color: #5d6b89;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            color: #ff6b6b; 
+            background-color: #232d4a;
+        }
+
+        /* --- CONTENIDO PRINCIPAL --- */
+        .main-content {
+            flex: 1;
+            width: calc(100% - 240px);
+            padding: 30px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-end; 
+        }
+
+        .user-greeting {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+
+        .card-container {
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-bottom: 60px; 
+        }
+
+        .match-card {
+            background-color: #161d31; 
+            border: 1px solid #1f2842;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 440px;
+            padding: 40px 35px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 18px;
+        }
+
+        .card-description {
+            color: #94a3b8;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 35px;
+            font-weight: 500;
+        }
+
+        .btn-search {
+            width: 100%;
+            padding: 16px;
+            background-color: #b5ff60; 
+            border: none;
+            border-radius: 8px;
+            color: #0b0f19;
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .btn-search:hover {
+            background-color: #a2e650;
+            box-shadow: 0 0 15px rgba(181, 255, 96, 0.3);
+        }
+
+        .btn-search:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-top">
+            <div class="logo">BINGO</div>
+            
+            <nav>
+                <ul class="nav-menu">
+                    <li>
+                        <a href="/menu" class="nav-item active">
+                            <span>🎮</span> Jugar en Línea
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/opciones" class="nav-item inactive">
+                            <span>⚙️</span> Opciones
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <div id="logoutBtn" class="logout-btn">
+            <span>🚪</span> Cerrar Sesión
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <!-- El id nos permite inyectar el nombre real con JS -->
+        <h2 class="user-greeting" id="greetingField">Hola, Jugador</h2>
+        
+        <div class="card-container">
+            <div class="match-card">
+                <h3 class="card-title">Partida Multijugador</h3>
+                <p class="card-description">
+                    Conéctate al servidor asíncrono y juega en tiempo real con personas de todo el mundo
+                </p>
+                <button class="btn-search" id="searchMatchBtn">Buscar Partida</button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Cargar dinámicamente el nombre del jugador que guardó el login
+            const playerName = localStorage.getItem('player_name') || "Jugador";
+            document.getElementById('greetingField').innerText = `Hola, ${playerName}`;
+
+            // 2. Evento del botón "Buscar Partida" para saltar al lobby
+            document.getElementById('searchMatchBtn').addEventListener('click', () => {
+                window.location.href = "/lobby";
+            });
+
+            // 3. Sistema de cierre de sesión seguro
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                localStorage.clear(); // Borra credenciales locales
+                alert("Sesión cerrada, pa. Volviendo al inicio.");
+                window.location.href = "/";
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo - Sala de Espera</title>
+    <style>
+        /* Reset de estilos básicos */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0b0f19; /* Fondo oscuro profundo */
+            min-height: 100vh;
+            display: flex;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        /* --- BARRA LATERAL (SIDEBAR) --- */
+        .sidebar {
+            width: 240px;
+            background-color: #1a2238; /* Azul grisáceo de la barra */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 30px 20px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            gap: 50px;
+        }
+
+        /* Logo superior "BINGO" */
+        .logo {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding-left: 10px;
+        }
+
+        /* Menú de navegación */
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            list-style: none;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        /* Opción activa (Jugar en Línea) */
+        .nav-item.active {
+            color: #b5ff60; /* Verde neón */
+        }
+
+        /* Opciones inactivas */
+        .nav-item.inactive {
+            color: #5d6b89;
+        }
+
+        .nav-item.inactive:hover {
+            color: #ffffff;
+            background-color: #232d4a;
+        }
+
+        /* Botón Cerrar Sesión abajo */
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            color: #5d6b89;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            color: #ff6b6b;
+            background-color: #232d4a;
+        }
+
+
+        /* --- CONTENIDO PRINCIPAL --- */
+        .main-content {
+            flex: 1; /* Corrección aplicada prro */
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+        }
+
+        /* Contenedor del Estado "Conectando..." */
+        .status-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Punto verde indicador */
+        .status-dot {
+            width: 20px;
+            height: 20px;
+            background-color: #00e6a6; /* Verde turquesa del diseño */
+            border-radius: 50%;
+            animation: pulse 1.8s infinite ease-in-out;
+        }
+
+        /* Texto de estado */
+        .status-text {
+            font-size: 26px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+
+        /* Tarjeta JUGADORES EN LA SALA */
+        .lobby-card {
+            background-color: #14192d; /* Fondo de la tarjeta central */
+            border: 1px solid #1f2742;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 360px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Título del contador */
+        .lobby-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 15px;
+            letter-spacing: 0.3px;
+        }
+
+        /* Descripción de la sala */
+        .lobby-description {
+            color: #94a3b8;
+            font-size: 11px;
+            line-height: 1.5;
+            font-weight: 600;
+            text-align: left; /* Alineación de texto a la izquierda como la imagen */
+            padding: 0 5px;
+        }
+
+        /* Animación para el punto de carga */
+        @keyframes pulse {
+            0% {
+                transform: scale(0.9);
+                opacity: 0.6;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0.9);
+                opacity: 0.6;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-top">
+            <div class="logo">BINGO</div>
+            
+            <nav>
+                <ul class="nav-menu">
+                    <li>
+                        <a href="#" class="nav-item active">
+                            <span>🎮</span> Jugar en Línea
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-item inactive">
+                            <span>⚙️</span> Opciones
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <a href="#" class="logout-btn">
+            <span>🚪</span> Cerrar Sesión
+        </a>
+    </aside>
+
+    <main class="main-content">
+        
+        <div class="status-container">
+            <div class="status-dot"></div>
+            <h2 class="status-text">Conectando...</h2>
+        </div>
+        
+        <div class="lobby-card">
+            <h3 class="lobby-title">Jugadores en la sala: 3 / 5</h3>
+            <p class="lobby-description">
+                La partida iniciará automáticamente cuando se llene la sala o el administrador dé la orden.
+            </p>
+        </div>
+
+    </main>
+
+</body>
+</html>
