@@ -109,6 +109,22 @@
         .modal-card h2 { color: #fff; font-size: 20px; margin-bottom: 14px; }
         .modal-card p { color: #94a3b8; font-size: 14px; line-height: 1.6; }
         .modal-card .highlight { color: #ffb800; font-weight: 700; }
+        .modal-card p { margin-bottom: 24px; }
+        .btn-volver-menu {
+            background-color: #2b3554;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .btn-volver-menu:hover { background-color: #38456e; }
+        .btn-volver-menu:active { transform: scale(0.97); }
     </style>
 </head>
 <body>
@@ -121,6 +137,7 @@
                 Tú tienes seleccionado <span class="highlight" id="myModeLabel">-</span> pero tu oponente tiene <span class="highlight" id="opponentModeLabel">-</span>.<br><br>
                 Ve a <strong>Opciones</strong> y pongan el mismo modo de juego para iniciar la partida.
             </p>
+            <button class="btn-volver-menu" onclick="window.location.href='/menu'">Volver al menú</button>
         </div>
     </div>
  
