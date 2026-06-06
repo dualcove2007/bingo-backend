@@ -257,10 +257,14 @@
                 ¡Felicitaciones, pa! Fuiste el primero en completar el bingo. El servidor validó tu cartón con éxito.
             </p>
             
-            <button class="return-menu-btn">Volver al menú</button>
+            <button class="return-menu-btn" onclick="window.location.href='/menu'">Volver al menú</button>
 
         </div>
     </div>
 
+    <script>
+        // Limpiar estado de juego al llegar a esta pantalla
+        localStorage.removeItem('game_mode_confirmed');
+    </script>
 </body>
 </html>

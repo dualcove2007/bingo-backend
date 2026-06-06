@@ -256,15 +256,20 @@
             </div>
             
             <!-- Mensaje de derrota -->
-            <p class="defeat-message">
-                El jugador [nombre del ganador] cantó BINGO primero. Más suerte para la próxima, mano.
+            <p class="defeat-message" id="defeatMessage">
+                El jugador <span id="winnerName">...</span> cantó BINGO primero. Más suerte para la próxima, mano.
             </p>
             
             <!-- Botón de retorno oscuro -->
-            <button class="return-menu-btn">Volver al menú</button>
+            <button class="return-menu-btn" onclick="window.location.href='/menu'">Volver al menú</button>
 
         </div>
     </div>
 
+    <script>
+        const ganador = sessionStorage.getItem('ultimo_ganador') || 'tu oponente';
+        document.getElementById('winnerName').textContent = ganador;
+        sessionStorage.removeItem('ultimo_ganador');
+    </script>
 </body>
 </html>

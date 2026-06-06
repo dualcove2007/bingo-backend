@@ -197,10 +197,14 @@ class GameManager:
             self._game_active = False
             if self._ball_task:
                 self._ball_task.cancel()
-            # Notificar a todos
+            # Notificar a todos, incluyendo el nombre del ganador
             for name in list(self.players.keys()):
                 ganaste = (name == claimer)
-                await self._send(name, {"tipo": "resultado_bingo", "ganaste": ganaste})
+                await self._send(name, {
+                    "tipo": "resultado_bingo",
+                    "ganaste": ganaste,
+                    "ganador": claimer.replace("_", " ")
+                })
             self._reset()
         else:
             # Bingo inválido — avisar solo al que lo cantó
@@ -382,4 +386,3 @@ async def login(user: UserLogin):
             raise e
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
- 

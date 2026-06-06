@@ -361,6 +361,7 @@
                         if (data.ganaste) {
                             window.location.href = '/ganador';
                         } else {
+                            if (data.ganador) sessionStorage.setItem('ultimo_ganador', data.ganador);
                             window.location.href = '/perdedor';
                         }
                         return;
@@ -402,4 +403,3 @@
  
 </body>
 </html>
- 
